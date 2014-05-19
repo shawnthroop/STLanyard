@@ -7,9 +7,15 @@
 
 #import "STLanyard.h"
 
+static const NSString *kAuthTokenString = @"kAuthToken";
+static const NSString *kUsernameString = @"kUsername";
+static const NSString *kKeyDescriptionString = @"kKeyDescription";
+static const NSString *kObjectString = @"kObject";
+
+
 #pragma mark - STLanyardObject -
 
-@interface STLanyardObject () {
+@interface STLanyardKey () {
     NSString *serviceID_;
     NSString *accountID_;
     NSDictionary *meta_;
@@ -17,7 +23,7 @@
 
 @end
 
-@implementation STLanyardObject
+@implementation STLanyardKey
 
 - (id)initWithServiceID:(NSString *)serviceID accountID:(NSString *)accountID authToken:(NSString *)authToken username:(NSString *)username keyDescription:(NSString *)keyDescription object:(id<NSCoding>)object
 {
@@ -30,19 +36,19 @@
         
         NSMutableDictionary *meta = [NSMutableDictionary new];
         if (authToken) {
-            [meta setObject:[authToken copy] forKey:@"authToken"];
+            [meta setObject:[authToken copy] forKey:kAuthTokenString];
         }
         
         if (username) {
-            [meta setObject:[username copy] forKey:@"username"];
+            [meta setObject:[username copy] forKey:kUsernameString];
         }
         
         if (keyDescription) {
-            [meta setObject:[keyDescription copy] forKey:@"keyDescription"];
+            [meta setObject:[keyDescription copy] forKey:kKeyDescriptionString];
         }
         
         if (object) {
-            [meta setObject:object forKey:@"object"];
+            [meta setObject:object forKey:kObjectString];
         }
         
         meta_ = meta;
@@ -59,10 +65,10 @@
 {
     return [self initWithServiceID:serviceID
                          accountID:accountID
-                         authToken:meta[@"authToken"]
-                          username:meta[@"username"]
-                    keyDescription:meta[@"keyDescription"]
-                            object:meta[@"object"]];
+                         authToken:meta[kAuthTokenString]
+                          username:meta[kUsernameString]
+                    keyDescription:meta[kKeyDescriptionString]
+                            object:meta[kObjectString]];
 }
 
 - (id)initWithServiceID:(NSString *)serviceID accountID:(NSString *)accountID
@@ -96,7 +102,7 @@
 {
     if(![obj isKindOfClass:[self class]]) return NO;
     
-    STLanyardObject *other = (STLanyardObject *)obj;
+    STLanyardKey *other = (STLanyardKey *)obj;
     
     BOOL serviceIsEqual = self.serviceID == other.serviceID || [self.serviceID isEqual:other.serviceID];
     BOOL accountIsEqual = self.accountID == other.accountID || [self.accountID isEqual:other.accountID];
@@ -118,28 +124,29 @@
 
 - (NSString *)authToken
 {
-    return [[meta_ objectForKey:@"authToken"] copy];
+    return [[meta_ objectForKey:kAuthTokenString] copy];
 }
 
 - (NSString *)username
 {
-    return [[meta_ objectForKey:@"username"] copy];
+    return [[meta_ objectForKey:kUsernameString] copy];
 }
 
 - (NSString *)keyDescription
 {
-    return [[meta_ objectForKey:@"keyDescription"] copy];
+    return [[meta_ objectForKey:kKeyDescriptionString] copy];
 }
 
 - (id<NSCoding>)object
 {
-    return [meta_ objectForKey:@"object"];
+    return [meta_ objectForKey:kObjectString];
 }
 
 - (NSDictionary *)meta
 {
     return [meta_ copy];
 }
+
 @end
 
 
@@ -152,7 +159,9 @@
 @interface STLanyard ()
 
 + (NSMutableDictionary *)getKeychainQueryForService:(NSString *)serviceID withAccountID:(NSString *)accountID;
-+ (NSMutableDictionary *)getKeychainQueryForLanyardObject:(STLanyardObject *)lanyardObject;
++ (NSMutableDictionary *)getKeychainQueryForKey:(STLanyardKey *)key;
+
+//+ (NSMutableDictionary *)getKeychainQueryForLanyardObject:(STLanyardObject *)lanyardObject;
 
 @end
 
@@ -163,15 +172,15 @@
 // see http://developer.apple.com/library/ios/#DOCUMENTATION/Security/Reference/keychainservices/Reference/reference.html
 
 
-+ (NSMutableDictionary *)getKeychainQueryForLanyardObject:(STLanyardObject *)object
++ (NSMutableDictionary *)getKeychainQueryForKey:(STLanyardKey *)key
 {
     NSMutableDictionary *keychainQuery = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                           (__bridge id)kSecClassGenericPassword, (__bridge id)kSecClass,
                                           (__bridge id)kSecAttrAccessibleAfterFirstUnlock, (__bridge id)kSecAttrAccessible,
-                                          object.serviceID, (__bridge id)kSecAttrService, nil];
+                                          key.serviceID, (__bridge id)kSecAttrService, nil];
     
-    if (object.accountID) {
-        [keychainQuery setObject:object.accountID forKey:(__bridge id)kSecAttrAccount];
+    if (key.accountID) {
+        [keychainQuery setObject:key.accountID forKey:(__bridge id)kSecAttrAccount];
     }
     
     return keychainQuery;
@@ -180,27 +189,30 @@
 
 + (NSMutableDictionary *)getKeychainQueryForService:(NSString *)serviceID withAccountID:(NSString *)accountID
 {
-    return [self getKeychainQueryForLanyardObject:[[STLanyardObject alloc] initWithServiceID:serviceID accountID:accountID]];
+    return [self getKeychainQueryForKey:[[STLanyardKey alloc] initWithServiceID:serviceID accountID:accountID]];
 }
 
 
 
-+ (void)saveLanyardObject:(STLanyardObject *)obj
++ (void)saveKey:(STLanyardKey *)key
 {
-    NSMutableDictionary *keychainQuery = [self getKeychainQueryForLanyardObject:obj];
+    NSAssert(key.accountID, @"Must provide an accountID when saving a key to the keychain");
+    
+    NSMutableDictionary *keychainQuery = [self getKeychainQueryForKey:key];
 
     // delete any previous value with this key
     SecItemDelete((__bridge CFDictionaryRef)keychainQuery);
     
-    [keychainQuery setObject:[NSKeyedArchiver archivedDataWithRootObject:obj.meta] forKey:(__bridge id)kSecValueData];
+    // archive and add the key's meta as the data object
+    [keychainQuery setObject:[NSKeyedArchiver archivedDataWithRootObject:key.meta] forKey:(__bridge id)kSecValueData];
     
     SecItemAdd((__bridge CFDictionaryRef)keychainQuery, NULL);
 }
 
 
-+ (STLanyardObject *)lanyardObjectForService:(NSString *)serviceID accountID:(NSString *)accountID
++ (STLanyardKey *)keyForService:(NSString *)serviceID accountID:(NSString *)accountID
 {
-    NSAssert(serviceID, @"Must provide serviceID when looking up lanyard objects");
+    NSAssert(serviceID, @"Must provide an accountID querying the keychain for a single item");
 
     NSMutableDictionary *keychainQuery = [self getKeychainQueryForService:serviceID withAccountID:accountID];
     CFDataRef keyData = NULL;
@@ -214,7 +226,7 @@
             meta = [NSKeyedUnarchiver unarchiveObjectWithData:(__bridge NSData *)keyData];
         }
         @catch (NSException *e) {
-            NSLog(@"Unarchive of %@ failed: %@ - %@", serviceID, accountID, e);
+            NSLog(@"Unarchive of %@ (%@) failed: %@", serviceID, accountID, e);
         }
         @finally {}
     }
@@ -223,20 +235,22 @@
         CFRelease(keyData);
     }
     
-    STLanyardObject *key = [[STLanyardObject alloc] initWithServiceID:serviceID
+    STLanyardKey *key = [[STLanyardKey alloc] initWithServiceID:serviceID
                                                             accountID:accountID
                                                                  meta:meta];
     return key;
 }
 
 
-+ (void)deleteLanyardObjectForService:(NSString *)service accountID:(NSString *)accountID
++ (void)deleteKeyForService:(NSString *)service accountID:(NSString *)accountID
 {
+    NSAssert(accountID, @"Must provide an accountID querying the keychain for a single item");
+
     NSMutableDictionary *keychainQuery = [self getKeychainQueryForService:service withAccountID:accountID];
     SecItemDelete((__bridge CFDictionaryRef)keychainQuery);
 }
 
-+ (NSArray *)lanyardObjectsForService:(NSString *)serviceID
++ (NSArray *)keysForService:(NSString *)serviceID
 {
     NSMutableDictionary *keychainQuery = [self getKeychainQueryForService:serviceID withAccountID:nil];
     CFTypeRef keyData = NULL;
@@ -255,11 +269,21 @@
             
             for (NSDictionary *account in serviceAccounts) {
                 
-                NSDictionary *meta = [NSKeyedUnarchiver unarchiveObjectWithData:[account objectForKey:(__bridge id)kSecValueData]];
-                STLanyardObject *key = [[STLanyardObject alloc] initWithServiceID:account[(__bridge id)kSecAttrService]
-                                                                        accountID:account[(__bridge id)kSecAttrAccount]
-                                                                             meta:meta];
-                [lanyardObjects addObject:key];
+                NSDictionary *meta = nil;
+                @try {
+                    meta = [NSKeyedUnarchiver unarchiveObjectWithData:[account objectForKey:(__bridge id)kSecValueData]];
+                }
+                @catch (NSException *exception) {
+                    NSLog(@"Unarchive of %@ (%@) failed: %@", serviceID, account[(__bridge id)kSecAttrAccount], exception);
+                }
+                @finally {}
+                
+                if (meta) {
+                    STLanyardKey *key = [[STLanyardKey alloc] initWithServiceID:account[(__bridge id)kSecAttrService]
+                                                                      accountID:account[(__bridge id)kSecAttrAccount]
+                                                                           meta:meta];
+                    [lanyardObjects addObject:key];
+                }
             }
         }
         

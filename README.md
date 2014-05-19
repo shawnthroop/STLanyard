@@ -3,63 +3,64 @@ STLanyard
 
 A simple wrapper for the iOS keychain.
 
-
-I was about to start building a sharing service into an app but dealing with `(__bridge id)kSecAttrService` and `CFTypeRef` was getting the best of me. So, I created this to hide all that ugly confusing stuff. [JNKeychain](https://github.com/jeremangnr/JNKeychain) helped me understand how the keychain worked but was too basic for my needs. 
+I was about to start building a sharing service into an app but dealing with `(__bridge id)kSecAttrService` and `CFTypeRef` was getting the best of me. So, I created this to hide all that ugly confusing stuff. [JNKeychain](https://github.com/jeremangnr/JNKeychain) was my inspiration and helped me understand how the keychain worked but it was too basic for my needs.
 
 ## Basic use
 
-All of the examples below are taken from a current project of mine being built for App.net. Below I explain how to store user credentials (an accessToken) recieved after authenticating an account with [ADNKit](https://github.com/joeldev/ADNKit).
+All of the examples below are taken from a current project of mine being built for App.net. Below I explain how to store user credentials (an accessToken) recieved after authenticating an account with [ADNKit](https://github.com/joeldev/ADNKit). 
+
+There are many [attribute item keys](https://developer.apple.com/library/ios/DOCUMENTATION/Security/Reference/keychainservices/Reference/reference.html#//apple_ref/doc/uid/TP30000898-CH4g-SW5) that can store simple strings or numbers, however it's more convenient to unarchive a single dictionary that supports objects that don't bridge to `CFStringRef` or `CFNumberRef`.
 
 
 ### Adding an Item
 
-To add a keychain entry simply create a STLanyardObject:
+To add a keychain entry simply create a STLanyardKey:
 
-    STLanyardObject *key = [[STLanyardObject alloc] initWithServiceID:@"App.net"
-                                                            accountID:@"5253"
-                                                            authToken:@"jsdf99sdfnnsdf8sdf"
-                                                             username:@"shawnthroop"
-                                                       keyDescription:@"Shawn Throop"
-                                                               object:user];
+    STLanyardKey *key = [[STLanyardKey alloc] initWithServiceID:@"App.net"
+                                                      accountID:@"5253"
+                                                      authToken:@"jsdf99sdfnnsdf8sdf"
+                                                       username:@"shawnthroop"
+                                                 keyDescription:@"Shawn Throop"
+                                                         object:user];
+
 Then add it to the keychain:
 
-    [STLanyard saveLanyardObject:key];
+    [STLanyard saveKey:key];
 
-**Note:** a serviceID and accountID are required when adding to an item to the keychain. These values are stored as item attributes and are used to access the item once it's been saved to the keychain. All other attributes are shuffled into a dictionary and archived as the keychain item's data attribute.
-
+**Note:** A `serviceID` and `accountID` are required when adding to an item to the keychain. These values are stored as attributes of the keychain item and are used to access the item after it's been saved into the keychain. All other attributes are shuffled into a dictionary and archived as the keychain item's data attribute.
 
 
 ### Retrieving an Item
 
-Retrieving an accessToken previously stored in the keychain under a user's userID (5253) is simple:
+Retrieving an accessToken previously stored in the keychain under a user's userID (@"5253") is simple:
 
-    STLanyardObject *key = [STLanyard lanyardObjectForService:@"App.net" accountID:userID];
+    STLanyardKey *key = [STLanyard keyForService:@"App.net" accountID:userID];
     NSLog(@"accessToken: %@", key.authToken);
-
-Simple.
-
 
 
 ### Retrieving Items for a Service
 
 Accessing all keychain items associated with a specific service is easy:
 
-    NSArray *keys = [STLanyard lanyardObjectsForService:@"App.net"];
+    NSArray *keys = [STLanyard keysForService:@"App.net"];
 
-This returns an immutable array of STLanyardObjects.
+This returns an immutable array of STLanyardKeys.
 
 
 
 ### Deleting an Item
 
-Say I want to remove all authentication data from the keychain, but only for a certain service. 
+Say I want to remove all authentication data for a certain service from the keychain.
 
-    NSArray *keys = [STLanyard lanyardObjectsForService:@"App.net"];
+    NSString *service = @"App.net";
+    NSArray *keys = [STLanyard keysForService:service];
     
-    for (STLanyardObject *key in keys) {
-        [STLanyard deleteLanyardObjectForService:@"App.net" accountID:key.accountID];
+    for (STLanyardKey *key in keys) {
+        [STLanyard deleteKeyForService:service accountID:key.accountID];
     }
 
+
+<br/>
 
 ---
 

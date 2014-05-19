@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface STLanyardObject : NSObject
+@interface STLanyardKey : NSObject
 @property (nonatomic, readonly) NSString *serviceID;
 @property (nonatomic, readonly) NSString *accountID;
 @property (nonatomic, readonly) NSString *keyDescription;
@@ -27,10 +27,10 @@
 
 @interface STLanyard : NSObject
 
-+ (void)saveLanyardObject:(STLanyardObject *)obj;
-+ (STLanyardObject *)lanyardObjectForService:(NSString *)serviceID accountID:(NSString *)accountID;
-+ (void)deleteLanyardObjectForService:(NSString *)serviceID accountID:(NSString *)accountID;
-+ (NSArray *)lanyardObjectsForService:(NSString *)serviceID;
++ (void)saveKey:(STLanyardKey *)key;
++ (STLanyardKey *)keyForService:(NSString *)serviceID accountID:(NSString *)accountID;
++ (void)deleteKeyForService:(NSString *)serviceID accountID:(NSString *)accountID;
++ (NSArray *)keysForService:(NSString *)serviceID;
 
 
 @end
