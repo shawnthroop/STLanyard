@@ -38,6 +38,8 @@ Retrieving an accessToken previously stored in the keychain under a user's userI
 
 Simple.
 
+
+
 ### Retrieving Items for a Service
 
 Accessing all keychain items associated with a specific service is easy:
@@ -48,7 +50,7 @@ This returns an immutable array of STLanyardObjects.
 
 
 
-## Deleting an Item
+### Deleting an Item
 
 Say I want to remove all authentication data from the keychain, but only for a certain service. 
 
