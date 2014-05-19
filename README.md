@@ -4,11 +4,11 @@ STLanyard
 A simple wrapper for the iOS keychain.
 
 
-I was about to start building a sharing service into an app but dealing with `(__bridge id)kSecAttrService` and `CFTypeRef` was getting the best of me. So, I created this to hide all that ugly confusing stuff.
+I was about to start building a sharing service into an app but dealing with `(__bridge id)kSecAttrService` and `CFTypeRef` was getting the best of me. So, I created this to hide all that ugly confusing stuff. [JNKeychain](https://github.com/jeremangnr/JNKeychain) helped me understand how the keychain worked but was too basic for my needs. 
 
 ## Basic use
 
-All of the examples below are taken from a current project of mine being built for App.net. Below I explain how to store user credentials (an accessToken) recieved after authenticating an account with ADNKit.
+All of the examples below are taken from a current project of mine being built for App.net. Below I explain how to store user credentials (an accessToken) recieved after authenticating an account with [ADNKit](https://github.com/joeldev/ADNKit).
 
 
 ### Adding an Item
@@ -59,7 +59,9 @@ Say I want to remove all authentication data from the keychain, but only for a c
     }
 
 
+---
 
+*This is my first foray into the land of open source. Please let me know what I'm doing wrong.*
 
 
 
