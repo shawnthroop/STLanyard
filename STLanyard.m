@@ -19,7 +19,6 @@
 
 @implementation STLanyardObject
 
-
 - (id)initWithServiceID:(NSString *)serviceID accountID:(NSString *)accountID authToken:(NSString *)authToken username:(NSString *)username keyDescription:(NSString *)keyDescription object:(id<NSCoding>)object
 {
     self = [super init];
