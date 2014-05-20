@@ -7,15 +7,17 @@
 
 #import "STLanyard.h"
 
-static const NSString *kAuthTokenString = @"kAuthToken";
-static const NSString *kUsernameString = @"kUsername";
-static const NSString *kKeyDescriptionString = @"kKeyDescription";
-static const NSString *kObjectString = @"kObject";
+
+NSString * const kAuthTokenString = @"kAuthToken";
+NSString * const kUsernameString = @"kUsername";
+NSString * const kKeyDescriptionString = @"kKeyDescription";
+NSString * const kObjectString = @"kObject";
 
 
 #pragma mark - STLanyardObject -
 
-@interface STLanyardKey () {
+@interface STLanyardKey ()
+{
     NSString *serviceID_;
     NSString *accountID_;
     NSDictionary *meta_;
@@ -93,10 +95,16 @@ static const NSString *kObjectString = @"kObject";
     return string;
 }
 
+
+
+
 - (NSUInteger)hash
 {
     return self.serviceID.hash ^ self.accountID.hash ^ self.meta.hash;
 }
+
+
+
 
 - (BOOL)isEqual:(id)obj
 {
@@ -110,7 +118,10 @@ static const NSString *kObjectString = @"kObject";
 }
 
 
+
+
 #pragma mark - Properties
+
 
 - (NSString *)serviceID
 {
@@ -167,32 +178,7 @@ static const NSString *kObjectString = @"kObject";
 @implementation STLanyard
 
 
-// see http://developer.apple.com/library/ios/#DOCUMENTATION/Security/Reference/keychainservices/Reference/reference.html
-
-+ (NSMutableDictionary *)getKeychainQueryForKey:(STLanyardKey *)key
-{
-    NSMutableDictionary *keychainQuery = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                          (__bridge id)kSecClassGenericPassword, (__bridge id)kSecClass,
-                                          (__bridge id)kSecAttrAccessibleAfterFirstUnlock, (__bridge id)kSecAttrAccessible,
-                                          key.serviceID, (__bridge id)kSecAttrService, nil];
-    
-    if (key.accountID) {
-        [keychainQuery setObject:key.accountID forKey:(__bridge id)kSecAttrAccount];
-    }
-    
-    return keychainQuery;
-}
-
-
-
-
-+ (NSMutableDictionary *)getKeychainQueryForService:(NSString *)serviceID withAccountID:(NSString *)accountID
-{
-    return [self getKeychainQueryForKey:[[STLanyardKey alloc] initWithServiceID:serviceID accountID:accountID]];
-}
-
-
-
+#pragma mark Public
 
 + (void)saveKey:(STLanyardKey *)key
 {
@@ -214,7 +200,7 @@ static const NSString *kObjectString = @"kObject";
 
 + (STLanyardKey *)keyForService:(NSString *)serviceID accountID:(NSString *)accountID
 {
-    NSAssert(serviceID, @"Must provide an accountID querying the keychain for a single item");
+    NSAssert(serviceID, @"Must provide an accountID when querying the keychain for a single item");
 
     NSMutableDictionary *keychainQuery = [self getKeychainQueryForService:serviceID withAccountID:accountID];
     CFDataRef keyData = NULL;
@@ -248,7 +234,7 @@ static const NSString *kObjectString = @"kObject";
 
 + (void)deleteKeyForService:(NSString *)service accountID:(NSString *)accountID
 {
-    NSAssert(accountID, @"Must provide an accountID querying the keychain for a single item");
+    NSAssert(accountID, @"Must provide an accountID when querying the keychain for a single item");
 
     NSMutableDictionary *keychainQuery = [self getKeychainQueryForService:service withAccountID:accountID];
     SecItemDelete((__bridge CFDictionaryRef)keychainQuery);
@@ -303,6 +289,33 @@ static const NSString *kObjectString = @"kObject";
     return [lanyardObjects copy];
 }
 
+
+
+#pragma mark Private
+
+// see http://developer.apple.com/library/ios/#DOCUMENTATION/Security/Reference/keychainservices/Reference/reference.html
+
++ (NSMutableDictionary *)getKeychainQueryForKey:(STLanyardKey *)key
+{
+    NSMutableDictionary *keychainQuery = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                          (__bridge id)kSecClassGenericPassword, (__bridge id)kSecClass,
+                                          (__bridge id)kSecAttrAccessibleAfterFirstUnlock, (__bridge id)kSecAttrAccessible,
+                                          key.serviceID, (__bridge id)kSecAttrService, nil];
+    
+    if (key.accountID) {
+        [keychainQuery setObject:key.accountID forKey:(__bridge id)kSecAttrAccount];
+    }
+    
+    return keychainQuery;
+}
+
+
+
+
++ (NSMutableDictionary *)getKeychainQueryForService:(NSString *)serviceID withAccountID:(NSString *)accountID
+{
+    return [self getKeychainQueryForKey:[[STLanyardKey alloc] initWithServiceID:serviceID accountID:accountID]];
+}
 
 
 @end

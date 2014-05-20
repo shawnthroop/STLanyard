@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 
 @interface STLanyardKey : NSObject
+
 @property (nonatomic, readonly) NSString *serviceID;
 @property (nonatomic, readonly) NSString *accountID;
 @property (nonatomic, readonly) NSString *keyDescription;
