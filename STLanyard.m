@@ -161,8 +161,6 @@ static const NSString *kObjectString = @"kObject";
 + (NSMutableDictionary *)getKeychainQueryForService:(NSString *)serviceID withAccountID:(NSString *)accountID;
 + (NSMutableDictionary *)getKeychainQueryForKey:(STLanyardKey *)key;
 
-//+ (NSMutableDictionary *)getKeychainQueryForLanyardObject:(STLanyardObject *)lanyardObject;
-
 @end
 
 
@@ -170,7 +168,6 @@ static const NSString *kObjectString = @"kObject";
 
 
 // see http://developer.apple.com/library/ios/#DOCUMENTATION/Security/Reference/keychainservices/Reference/reference.html
-
 
 + (NSMutableDictionary *)getKeychainQueryForKey:(STLanyardKey *)key
 {
@@ -187,10 +184,13 @@ static const NSString *kObjectString = @"kObject";
 }
 
 
+
+
 + (NSMutableDictionary *)getKeychainQueryForService:(NSString *)serviceID withAccountID:(NSString *)accountID
 {
     return [self getKeychainQueryForKey:[[STLanyardKey alloc] initWithServiceID:serviceID accountID:accountID]];
 }
+
 
 
 
@@ -208,6 +208,8 @@ static const NSString *kObjectString = @"kObject";
     
     SecItemAdd((__bridge CFDictionaryRef)keychainQuery, NULL);
 }
+
+
 
 
 + (STLanyardKey *)keyForService:(NSString *)serviceID accountID:(NSString *)accountID
@@ -242,6 +244,8 @@ static const NSString *kObjectString = @"kObject";
 }
 
 
+
+
 + (void)deleteKeyForService:(NSString *)service accountID:(NSString *)accountID
 {
     NSAssert(accountID, @"Must provide an accountID querying the keychain for a single item");
@@ -249,6 +253,9 @@ static const NSString *kObjectString = @"kObject";
     NSMutableDictionary *keychainQuery = [self getKeychainQueryForService:service withAccountID:accountID];
     SecItemDelete((__bridge CFDictionaryRef)keychainQuery);
 }
+
+
+
 
 + (NSArray *)keysForService:(NSString *)serviceID
 {
@@ -295,8 +302,6 @@ static const NSString *kObjectString = @"kObject";
     
     return [lanyardObjects copy];
 }
-
-
 
 
 
