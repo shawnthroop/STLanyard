@@ -100,7 +100,7 @@ NSString * const kObjectString = @"kObject";
 
 - (NSUInteger)hash
 {
-    return self.serviceID.hash ^ self.accountID.hash ^ self.meta.hash;
+    return [self.serviceID hash] ^ [self.accountID hash] ^ [self.meta hash];
 }
 
 
@@ -108,12 +108,14 @@ NSString * const kObjectString = @"kObject";
 
 - (BOOL)isEqual:(id)obj
 {
-    if(![obj isKindOfClass:[self class]]) return NO;
+    if(![obj isKindOfClass:[STLanyardKey class]]) {
+        return NO;
+    }
     
-    STLanyardKey *other = (STLanyardKey *)obj;
+    STLanyardKey *key = (STLanyardKey *)obj;
     
-    BOOL serviceIsEqual = self.serviceID == other.serviceID || [self.serviceID isEqual:other.serviceID];
-    BOOL accountIsEqual = self.accountID == other.accountID || [self.accountID isEqual:other.accountID];
+    BOOL serviceIsEqual = (!self.serviceID && !key.serviceID) || [self.serviceID isEqualToString:key.serviceID];
+    BOOL accountIsEqual = (!self.accountID && !key.accountID) || [self.accountID isEqualToString:key.accountID];
     return serviceIsEqual && accountIsEqual;
 }
 
