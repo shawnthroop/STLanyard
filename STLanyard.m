@@ -216,9 +216,12 @@ NSString * const kObjectString = @"kObject";
             meta = [NSKeyedUnarchiver unarchiveObjectWithData:(__bridge NSData *)keyData];
         }
         @catch (NSException *e) {
-            NSLog(@"Unarchive of %@ (%@) failed: %@", serviceID, accountID, e);
+            NSLog(@"<STLanyard> Error: could not unarchive metadata for serivce: \"%@\" accountID: \"%@\" - %@", serviceID, accountID, e);
+            meta = nil;
         }
         @finally {}
+    } else {
+        NSLog(@"<STLanyard> Error: keychain item for service: \"%@\" accountID: \"%@\" not found", serviceID, accountID);
     }
     
     if (keyData) {
@@ -226,9 +229,11 @@ NSString * const kObjectString = @"kObject";
     }
     
     STLanyardKey *key = [[STLanyardKey alloc] initWithServiceID:serviceID
-                                                            accountID:accountID
-                                                                 meta:meta];
-    return key;
+                                                      accountID:accountID
+                                                           meta:meta];
+    
+    // if meta is nil, there was an error
+    return meta == nil ? nil : key;
 }
 
 
@@ -259,7 +264,7 @@ NSString * const kObjectString = @"kObject";
     if (SecItemCopyMatching((__bridge CFDictionaryRef)keychainQuery, (CFTypeRef *)&keyData) == noErr) {
         NSArray *serviceAccounts = [NSArray arrayWithArray:(__bridge id)keyData];
         
-        if (serviceAccounts.count && serviceAccounts.count > 0) {
+        if (serviceAccounts && serviceAccounts.count > 0) {
             lanyardObjects = [NSMutableArray new];
             
             for (NSDictionary *account in serviceAccounts) {
@@ -268,8 +273,8 @@ NSString * const kObjectString = @"kObject";
                 @try {
                     meta = [NSKeyedUnarchiver unarchiveObjectWithData:[account objectForKey:(__bridge id)kSecValueData]];
                 }
-                @catch (NSException *exception) {
-                    NSLog(@"Unarchive of %@ (%@) failed: %@", serviceID, account[(__bridge id)kSecAttrAccount], exception);
+                @catch (NSException *e) {
+                    NSLog(@"<STLanyard> Error: could not unarchive metadata for serivce: \"%@\" accountID: \"%@\" - %@", serviceID, account[(__bridge id)kSecAttrAccount], e);
                 }
                 @finally {}
                 
@@ -288,7 +293,7 @@ NSString * const kObjectString = @"kObject";
         CFRelease(keyData);
     }
     
-    return [lanyardObjects copy];
+    return (lanyardObjects == nil || lanyardObjects.count == 0) ? nil : [lanyardObjects copy];
 }
 
 
