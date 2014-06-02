@@ -18,14 +18,26 @@ NSString * const kObjectString = @"kObject";
 
 @interface STLanyardKey ()
 {
-    NSString *serviceID_;
-    NSString *accountID_;
-    NSDictionary *meta_;
+    NSString *_serviceID;
+    NSString *_accountID;
+    NSDictionary *_meta;
 }
 
 @end
 
 @implementation STLanyardKey
+
++ (instancetype)lanyardKeyWithServiceID:(NSString *)serviceID accountID:(NSString *)accountID authToken:(NSString *)authToken username:(NSString *)username keyDescription:(NSString *)keyDescription object:(id<NSCoding>)object
+{
+    return [[STLanyardKey alloc] initWithServiceID:serviceID
+                                         accountID:accountID
+                                         authToken:authToken
+                                          username:username
+                                    keyDescription:keyDescription
+                                            object:object];
+}
+
+
 
 - (id)initWithServiceID:(NSString *)serviceID accountID:(NSString *)accountID authToken:(NSString *)authToken username:(NSString *)username keyDescription:(NSString *)keyDescription object:(id<NSCoding>)object
 {
@@ -33,8 +45,8 @@ NSString * const kObjectString = @"kObject";
     if (self) {
         NSAssert(serviceID, @"Must provide a serviceID for lookup");
         
-        serviceID_ = [serviceID copy];
-        accountID_ = [accountID copy];
+        _serviceID = [serviceID copy];
+        _accountID = [accountID copy];
         
         NSMutableDictionary *meta = [NSMutableDictionary new];
         if (authToken) {
@@ -53,7 +65,7 @@ NSString * const kObjectString = @"kObject";
             [meta setObject:object forKey:kObjectString];
         }
         
-        meta_ = meta;
+        _meta = meta;
     }
     return self;
 }
@@ -77,7 +89,6 @@ NSString * const kObjectString = @"kObject";
 {
     return [self initWithServiceID:serviceID accountID:accountID authToken:nil username:nil keyDescription:nil object:nil];
 }
-
 
 
 
@@ -127,37 +138,37 @@ NSString * const kObjectString = @"kObject";
 
 - (NSString *)serviceID
 {
-    return [serviceID_ copy];
+    return [_serviceID copy];
 }
 
 - (NSString *)accountID
 {
-    return [accountID_ copy];
+    return [_accountID copy];
 }
 
 - (NSString *)authToken
 {
-    return [[meta_ objectForKey:kAuthTokenString] copy];
+    return [[_meta objectForKey:kAuthTokenString] copy];
 }
 
 - (NSString *)username
 {
-    return [[meta_ objectForKey:kUsernameString] copy];
+    return [[_meta objectForKey:kUsernameString] copy];
 }
 
 - (NSString *)keyDescription
 {
-    return [[meta_ objectForKey:kKeyDescriptionString] copy];
+    return [[_meta objectForKey:kKeyDescriptionString] copy];
 }
 
 - (id<NSCoding>)object
 {
-    return [meta_ objectForKey:kObjectString];
+    return [_meta objectForKey:kObjectString];
 }
 
 - (NSDictionary *)meta
 {
-    return [meta_ copy];
+    return [_meta copy];
 }
 
 @end
@@ -237,7 +248,12 @@ NSString * const kObjectString = @"kObject";
 }
 
 
-
++ (void)deleteKey:(STLanyardKey *)key
+{
+    NSAssert(key != nil, @"Must provide a key to delete");
+    
+    [self deleteKeyForService:key.serviceID accountID:key.accountID];
+}
 
 + (void)deleteKeyForService:(NSString *)service accountID:(NSString *)accountID
 {

@@ -18,6 +18,8 @@
 
 @property (nonatomic, readonly) NSDictionary *meta;
 
++ (instancetype)lanyardKeyWithServiceID:(NSString *)serviceID accountID:(NSString *)accountID authToken:(NSString *)authToken username:(NSString *)username keyDescription:(NSString *)keyDescription object:(id<NSCoding>)object;
+
 - (id)initWithServiceID:(NSString *)serviceID accountID:(NSString *)accountID authToken:(NSString *)authToken username:(NSString *)username keyDescription:(NSString *)keyDescription object:(id<NSCoding>)object;
 
 - (id)initWithServiceID:(NSString *)serviceID accountID:(NSString *)accountID authToken:(NSString *)authToken username:(NSString *)username keyDescription:(NSString *)keyDescription;
@@ -29,9 +31,12 @@
 @interface STLanyard : NSObject
 
 + (void)saveKey:(STLanyardKey *)key;
+
 + (STLanyardKey *)keyForService:(NSString *)serviceID accountID:(NSString *)accountID;
-+ (void)deleteKeyForService:(NSString *)serviceID accountID:(NSString *)accountID;
 + (NSArray *)keysForService:(NSString *)serviceID;
+
++ (void)deleteKey:(STLanyardKey *)key;
++ (void)deleteKeyForService:(NSString *)serviceID accountID:(NSString *)accountID;
 
 
 @end
