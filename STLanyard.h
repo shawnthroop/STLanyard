@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface STLanyardKey : NSObject
+@interface STLanyardKey : NSObject <NSCopying>
 
 @property (nonatomic, readonly) NSString *serviceID;
 @property (nonatomic, readonly) NSString *accountID;

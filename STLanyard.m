@@ -92,6 +92,12 @@ NSString * const kObjectString = @"kObject";
 
 
 
+- (id)copyWithZone:(NSZone *)zone
+{
+    return [[[self class] alloc] initWithServiceID:self.serviceID accountID:self.username meta:self.meta];
+}
+
+
 - (NSString *)description
 {
     NSString *string = [NSString stringWithFormat:@"<%@> - %@", [self class], self.serviceID];
