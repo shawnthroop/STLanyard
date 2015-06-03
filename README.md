@@ -46,7 +46,7 @@ NSLog(@"accessToken: %@", key.authToken);
 
 Accessing all keychain items associated with a specific service is easy:
 
-```
+```objc
 NSArray *keys = [STLanyard keysForService:@"App.net"];
 ```
 
