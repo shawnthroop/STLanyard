@@ -35,7 +35,7 @@ Then add it to the keychain:
 
 ### Retrieving an Item
 
-Retrieving an accessToken previously stored in the keychain under a user's userID (@"5253") is simple:
+Retrieving an accessToken previously stored in the keychain under a user's userID (`@"5253"`) is simple:
 
 ```objc
 STLanyardKey *key = [STLanyard keyForService:@"App.net" accountID:userID];
@@ -72,6 +72,3 @@ for (STLanyardKey *key in keys) {
 ---
 
 *This is my first foray into the land of open source. Please let me know what I'm doing wrong.*
-
-
-
