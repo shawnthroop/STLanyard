@@ -16,16 +16,19 @@ There are many [attribute item keys](https://developer.apple.com/library/ios/DOC
 
 To add a keychain entry simply create a STLanyardKey:
 
-    STLanyardKey *key = [[STLanyardKey alloc] initWithServiceID:@"App.net"
-                                                      accountID:@"5253"
-                                                      authToken:@"jsdf99sdfnnsdf8sdf"
-                                                       username:@"shawnthroop"
-                                                 keyDescription:@"Shawn Throop"
-                                                         object:user];
-
+```objc
+STLanyardKey *key = [[STLanyardKey alloc] initWithServiceID:@"App.net"
+                                                  accountID:@"5253"
+                                                  authToken:@"jsdf99sdfnnsdf8sdf"
+                                                   username:@"shawnthroop"
+                                             keyDescription:@"Shawn Throop"
+                                                     object:user];
+```
 Then add it to the keychain:
 
-    [STLanyard saveKey:key];
+```objc
+[STLanyard saveKey:key];
+```
 
 **Note:** A `serviceID` and `accountID` are required when adding to an item to the keychain. These values are stored as attributes of the keychain item and are used to access the item after it's been saved into the keychain. All other attributes are shuffled into a dictionary and archived as the keychain item's data attribute.
 
@@ -34,15 +37,18 @@ Then add it to the keychain:
 
 Retrieving an accessToken previously stored in the keychain under a user's userID (@"5253") is simple:
 
-    STLanyardKey *key = [STLanyard keyForService:@"App.net" accountID:userID];
-    NSLog(@"accessToken: %@", key.authToken);
-
+```objc
+STLanyardKey *key = [STLanyard keyForService:@"App.net" accountID:userID];
+NSLog(@"accessToken: %@", key.authToken);
+```
 
 ### Retrieving Items for a Service
 
 Accessing all keychain items associated with a specific service is easy:
 
-    NSArray *keys = [STLanyard keysForService:@"App.net"];
+```
+NSArray *keys = [STLanyard keysForService:@"App.net"];
+```
 
 This returns an immutable array of STLanyardKeys.
 
@@ -52,13 +58,14 @@ This returns an immutable array of STLanyardKeys.
 
 Say I want to remove all authentication data for a certain service from the keychain.
 
-    NSString *service = @"App.net";
-    NSArray *keys = [STLanyard keysForService:service];
-    
-    for (STLanyardKey *key in keys) {
-        [STLanyard deleteKeyForService:service accountID:key.accountID];
-    }
+```objc
+NSString *service = @"App.net";
+NSArray *keys = [STLanyard keysForService:service];
 
+for (STLanyardKey *key in keys) {
+    [STLanyard deleteKeyForService:service accountID:key.accountID];
+}
+```
 
 <br/>
 
